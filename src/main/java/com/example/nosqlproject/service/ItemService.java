@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,36 +17,27 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Slf4j
 public class ItemService {
-
+    @Autowired
     private ItemRepository itemRepository;
 
-    public ItemDTO createItem(ItemDTO itemDTO) {
-        Item item = convertToItem(itemDTO);
-        Item savedItem = itemRepository.save(item);
-        return convertToItemDTO(savedItem);
+    public Item createItem(Item item) {
+        return itemRepository.save(item);
     }
 
-    public List<ItemDTO> getAllItems() {
-        List<Item> items = itemRepository.findAll();
-        return items.stream()
-                .map(this::convertToItemDTO)
-                .collect(Collectors.toList());
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
     }
 
-    private Item convertToItem(ItemDTO itemDTO) {
-        Item item = new Item();
-        item.setName(itemDTO.getName());
-        item.setPrice(itemDTO.getPrice());
-        item.setUrl(itemDTO.getUrl());
-        return item;
+    public Item getItemById(String id) {
+        return itemRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Item not found with id " + id));
     }
 
-    private ItemDTO convertToItemDTO(Item item) {
-        ItemDTO itemDTO = new ItemDTO();
-        itemDTO.setName(item.getName());
-        itemDTO.setPrice(item.getPrice());
-        itemDTO.setUrl(item.getUrl());
-        return itemDTO;
+    public Item getItemByName(String name) {
+        return itemRepository.findByName(name);
     }
 
+    public void deleteItemById(String id) {
+        itemRepository.deleteById(id);
+    }
 }
+

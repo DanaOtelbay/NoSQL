@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.MalformedURLException;
@@ -22,22 +19,39 @@ import java.util.List;
 @RestController
 @Slf4j
 @AllArgsConstructor
+@RequestMapping("/items")
 public class ItemController {
+    @Autowired
     private ItemService itemService;
 
-    @PostMapping("/item")
-    public ResponseEntity<Object> createItem(@Valid @RequestBody ItemDTO itemDTO, BindingResult result) throws MalformedURLException{
-        if(result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }
-
-        ItemDTO createdItem = itemService.createItem(itemDTO);
-        return new ResponseEntity<>(createdItem, HttpStatus.CREATED);
+    @PostMapping
+    public ResponseEntity<Item> createItem(@Valid @RequestBody Item item) {
+        Item savedItem = itemService.createItem(item);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedItem);
     }
 
-    @GetMapping("/items")
-    public ResponseEntity<List<ItemDTO>> getAllItems(){
-        List<ItemDTO> items = itemService.getAllItems();
+    @GetMapping
+    public ResponseEntity<List<Item>> getAllItems() {
+        List<Item> items = itemService.getAllItems();
         return ResponseEntity.ok(items);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Item> getItemById(@PathVariable String id) {
+        Item item = itemService.getItemById(id);
+        return ResponseEntity.ok(item);
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<Item> getItemByName(@PathVariable String name) {
+        Item item = itemService.getItemByName(name);
+        return ResponseEntity.ok(item);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteItemById(@PathVariable String id) {
+        itemService.deleteItemById(id);
+        return ResponseEntity.noContent().build();
+    }
 }
+
